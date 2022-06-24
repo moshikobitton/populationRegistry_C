@@ -26,10 +26,9 @@ typedef struct db_mgr
     int sizeOfPeople;
     int sizeOfPeopleIRT;
 } db_mgr;
-// כדי לדעת מה כל פונקציה עושה אנא הניחו את העכבר על שמה של הפונקציה בשורת ההכרזה כאן למטה ויופיע תיאור קצר
 
 void print_person(const Person *p);
-int init_db(db_mgr* db);
+int dynamicAllocation(db_mgr* db);
 int menu();
 int add_person(db_mgr* db);
 void orderById(db_mgr* db , Person* p);
@@ -54,7 +53,7 @@ void main()
     admin.people = NULL;
     admin.sizeOfPeopleIRT = 0;
     printf("---Welcome To Our Database---\n");
-    init_db(&admin);
+    dynamicAllocation(&admin);
     int choose = menu();
      while(choose != 8)
      {
@@ -95,8 +94,9 @@ void main()
      }
      quit(&admin);
 }
+// For dynamic allocation.
 //פונקציה שנועדה להקצאת זיכרון
-int init_db(db_mgr* db)
+int dynamicAllocation(db_mgr* db)
 {
     Person* tmp = NULL;
     if (db->sizeOfPeopleIRT == 0)
@@ -141,6 +141,7 @@ int init_db(db_mgr* db)
         return 1;
     }
 }
+// Print all information of person.
 //פונקציה שנועדה להדפיס את כל פרטי אותו אדם
 void print_person(const Person* p)
 {
@@ -159,6 +160,7 @@ void print_person(const Person* p)
         printf("the number id for children %d is: %lld\n", (i + 1), p->childrenPtr[i]);
     printf("---------------------------------------\n");
 }
+// For presention menu.
 //פונקציה שנועדה להצגת תפריט פעולות
 int menu()
 {
@@ -181,6 +183,7 @@ int menu()
     }while (num > 8 || num < 1);
     return num;
 }
+// Adding new person.
 //פונקציה להוספת אדם למערך התושבים
 int add_person(db_mgr* db)
 {
@@ -188,7 +191,7 @@ int add_person(db_mgr* db)
     printf("Please enter id number : \n");
     scanf("%lld", &id);
     Person* p = search_id(db, id);
-    while (id <= 0 || p != NULL) // לולאה הבודקת תקינות הקלט ועם כבר התעודת זהות קיימת במערכת
+    while (id <= 0 || p != NULL) // לולאה הבודקת תקינות הקלט ועם כבר התעודת זהות קיימת במערכת // Verifiction and if exist.
     {
         if(p)
             printf("Error - this id has already taken, please enter again : \n");
@@ -202,7 +205,7 @@ int add_person(db_mgr* db)
     if(db->sizeOfPeopleIRT > db->sizeOfPeople)
     {
         db->sizeOfPeople++;
-        int control = init_db(db);
+        int control = dynamicAllocation(db);
         if (control == 0)
         {
             db->sizeOfPeople--;
@@ -276,6 +279,7 @@ int add_person(db_mgr* db)
     printf("---------------------------------------\n");
     return 1;
 }
+// Insert to sorted array new person.
 // פונקציה שמכניסה את הבן אדם למקומו המתאים למערך שכבר ממוין
 void orderById(db_mgr* db , Person* p)
 {
@@ -292,6 +296,7 @@ void orderById(db_mgr* db , Person* p)
                 db->people[k] = *p;
         }
 }
+// Search by id and return his ptr.
 //פונקציה שמחפשת ברשומות, אדם לפי תעודת הזהות שלו ומחזירה מצביע לאדם המבוקש
 Person* search_id(const db_mgr* db,  long long id)
 {
@@ -302,6 +307,7 @@ Person* search_id(const db_mgr* db,  long long id)
     }
     return NULL;
 }
+// For searching person.
 // פונקציה שבודקת אם קיים אדם כזה
 void search_person(const db_mgr* db)
 {
@@ -323,6 +329,7 @@ void search_person(const db_mgr* db)
     }
     
 }
+// Search parents to person and print their info.
 //פונקציה שנועדה לחפש האם קיימים לאדם במערכת הורים,ואם כן להדפיס את פרטיהם
 void search_parents(const db_mgr* db)
 {
@@ -366,6 +373,7 @@ void search_parents(const db_mgr* db)
         }
     }
 }
+// Delete person from our system.
 //פונקציה שנועדה למחוק אדם שקיים במערכת
 int delete_person(db_mgr* db)
 {
@@ -407,7 +415,7 @@ int delete_person(db_mgr* db)
     temp = db->people[db->sizeOfPeople];
     db->people[db->sizeOfPeople] = *p;
     *p = temp;
-    int control1 = init_db(db);
+    int control1 = dynamicAllocation(db);
     if(control1 == 0)
         return 0;
     orderById2(db);
@@ -415,6 +423,7 @@ int delete_person(db_mgr* db)
     printf("---------------------------------------\n");
     return 1;
 }
+// Delete child from parent information.
 //פונקציה שמוחקת את הילד מההורה שלו. כך שבהדפסת ההורה הילד אינו יופיע.
 int Delete_ChildrenFromParent(db_mgr* db ,const long long* parent ,const long long* id)
 {
@@ -444,6 +453,7 @@ int Delete_ChildrenFromParent(db_mgr* db ,const long long* parent ,const long lo
     temp = NULL;
     return 1;
 }
+// Delete parent from child information.
 //פונקציה שמוחקת הורה מהרשומה של הילד שלו. ההורה אינו יופיע בהדפסת הילד כי ההורה נמחק מהרשומות
 void Delete_Parent(db_mgr* db,Person* p)
 {
@@ -461,6 +471,7 @@ void Delete_Parent(db_mgr* db,Person* p)
     free(p->childrenPtr);
     p->childrenPtr = NULL;
 }
+// Order people by them id's.
 //פונקציה הממיינת את מערך האנשים לפי סדר עולה של התעודות זהות שלהם
 void orderById2(db_mgr* db)
 {
@@ -481,6 +492,7 @@ void orderById2(db_mgr* db)
         min = db->people[i+1].id;
     }
 }
+// Print all persons.
 //פונקציה המדפיסה את כל הרשומות שקיימות
 void print_db(const db_mgr* db)
 {
@@ -492,6 +504,7 @@ void print_db(const db_mgr* db)
         print_person(&(db->people[i]));
     }
 }
+// Search by name and return all persons with this name.
 //פונקציה המחפשת שם מלא ומדפיסה את כל האנשים עם השם המלא שנקלט
 void search_by_name(const db_mgr* db)
 {
@@ -516,6 +529,7 @@ void search_by_name(const db_mgr* db)
     else printf("We found %d people with the full name you entered\n", counter);
     printf("---------------------------------------\n");
 }
+// Free all dynamic allocation.
 // פוקנציית שחרור - פונקציה המשחררת את כל הזיכרון הדינאמי
 void quit(db_mgr* db)
 {
@@ -535,6 +549,7 @@ void quit(db_mgr* db)
     free(db->people);
     db->people = NULL;
 }
+// Return the generation of person.
 // מחזירה את מספר הדורות של הבן אדם המבוקש
 int get_gen(const db_mgr* db)
 {
@@ -561,6 +576,7 @@ int get_gen(const db_mgr* db)
     printf("---------------------------------------\n");
     return 1;
 }
+// Calculate the generation of person.
 // פונקציית עזר המקבלת מצביע לבן אדם ומצביע למבנה של המנהל ומחזירה את מספר הדור של הבן אדם שקיבלנו
 int generation(const db_mgr* db, Person* p)
 {
@@ -572,6 +588,7 @@ int generation(const db_mgr* db, Person* p)
     int i = 0;
         do
         {
+            // If the current person exist in the parents array.
             for (int j = 0; j < size - 1; j++) // לולאת בדיקה אם האדם הנוכחי נמצא במערך ההורים שלנו
             {
                 if (parents[j].id == p1->id)
@@ -580,66 +597,69 @@ int generation(const db_mgr* db, Person* p)
                     break;           // כשמצאנו אין טעם להמשיך
                 }
             }
+            // If there is childrens and check is 0.
             if(p1->numOfChildren > 0 && check == 0)// אם לאדם הנוכחי יש ילדים וצ׳ק שווה ל0 ניכנס לתנאי
             {
                 counter++;
                 parents = (Person*)realloc(parents, size * sizeof(Person));
                 if (!parents)
                     return 0;
-                parents[size - 1] = *p1; // השמה של ההורה במערך ההורים במקום האחרון-החדש
+                parents[size - 1] = *p1; // השמה של ההורה במערך ההורים במקום האחרון-החדש // Push new parent to parents array.
                 k = size - 1;
                 size++;
                 k++;
                 i = 0;
                 id = p1->childrenPtr[i];
-                p1 = search_id(db ,id); // נמשיך לילד הראשון של האדם הנוכחי
+                p1 = search_id(db ,id); // נמשיך לילד הראשון של האדם הנוכחי // Continue to first child.
                 i=-1;
                 if(maxCounter < counter)
                     maxCounter = counter;
             }
             else
             {
+                // Checking if the current person is the last child.
                 if(parents[k-1].numOfChildren-1 <= i) // בדיקה אם האדם הנוכחי הוא הילד האחרון(אם כן נכנסים לתנאי)
                 {
+                    // If negative then we got our first person.
                     if(k-2 < 0)  // בדיקה אם יש חריגה למשתנה - אם יש חריגה אז הגענו לבן אדם שששאלנו על הדור שלו
                         p1 = p;
                     else
                     {
-                        for (int j = 0; j < size - 1; j++) // חיפוש סבא/סבתא לאדם הנוכחי
+                        for (int j = 0; j < size - 1; j++) // חיפוש סבא/סבתא לאדם הנוכחי // Looking for grandmother/grandfather.
                         {
-                            if(parents[k-1].fatherId == parents[j].id) // חיפוש אמא במערך parents
+                            if(parents[k-1].fatherId == parents[j].id) // חיפוש אבא במערך parents // Looking for father
                             {
                                 parent = parents[j];
                                 break;
                             }
-                            if(parents[k-1].motherId == parents[j].id) // חיפוש אבא במערך parents
+                            if(parents[k-1].motherId == parents[j].id) // חיפוש אמא במערך parents // Looking for mother
                             {
                                 parent = parents[j];
                                 break;
                             }
                         }
                         p1 = brotherOrSister(db, &parent, &parents[k - 1].id); //בודקים אם קיים אח של ההורה של האדם הנוכח
-                        if(!p1) // בדיקה אם קיבלנו אח של ההורה של האדם הנוכחי
+                        if(!p1) // בדיקה אם קיבלנו אח של ההורה של האדם הנוכחי // Checking if there is brother to parent.
                         {
                             p1 = &parent; // לא מצאנו בן אדם כזה לכן נלך עוד דור אחורה ועכשיו נהיה בסבא/סבתא של הנוכחי
-                            counter--; // יורדים דור
+                            counter--; // יורדים דור // Previous generation.
                         }
                         k--;
                     }
                 }
                 else
-                    p1 = search_id(db, parents[k-1].childrenPtr[i+1]); //אין לאדם הנוכחי ילדים לכן נמשיך לאחיו/אחותו
+                    p1 = search_id(db, parents[k-1].childrenPtr[i+1]); //אין לאדם הנוכחי ילדים לכן נמשיך לאחיו/אחותו // If there is no childrens then we looking for his borther.
             }
-            if (!p1) // אם המצביע שלנו הוא נאל נמשיך לאח או להורה שלו
+            if (!p1) // אם המצביע שלנו הוא נאל נמשיך לאח או להורה שלו // If p1 is null -> continue to brother/parent.
             {
                 Person* parent1 = FatherOrMother(id, parents, size);
-                Person* p3 = brotherOrSister(db , parent1 ,&id);  // מצביע כדי לבדוק האם קיים אח
-                if (!p3) // אם לא קיים עוד אח במאגר נמשיך להורה
+                Person* p3 = brotherOrSister(db , parent1 ,&id);  // מצביע כדי לבדוק האם קיים אח // Ptr to check if there is a brother.
+                if (!p3) // אם לא קיים עוד אח במאגר נמשיך להורה // If there in no brother then we back to parent.
                 {
-                    p1 = parent1; // נשווה להורה
-                    counter--; // נרד דור
+                    p1 = parent1; // נשווה להורה // Equals to parent.
+                    counter--; // נרד דור // Previous generation.
                 }
-                else p1 = p3; // אם האח במאגר אז נשווה לאח
+                else p1 = p3; // אם האח במאגר אז נשווה לאח // If the brother already exist in the system.
             }
             check = 0;
             i++;
@@ -648,6 +668,7 @@ int generation(const db_mgr* db, Person* p)
         parents = NULL;
         return maxCounter;
 }
+// This function check if ther is more brothers.
 // פונקציה הבודקת אם קיים עוד אח. היא מקבלת תעודת זהות של הילד ומצביע פרסון של ההורה ואם מוצאת אח רשום במאגר היא מחזירה מצביע אליו אחרת מחזירה נאל
 Person* brotherOrSister(const db_mgr*db ,const Person* p ,const long long* id)
 {
@@ -657,16 +678,17 @@ Person* brotherOrSister(const db_mgr*db ,const Person* p ,const long long* id)
         {
             for (int j = i; j < p->numOfChildren; j++)
             {
-                Person* tmp = search_id(db, p->childrenPtr[j + 1]); // מצביע לבדוק האם קיים אח גדול
-                if (!tmp) // אם לא קיים אח
-                    continue; // אז נמשיך לאח הבא
-               return tmp; // אם מצאנו אח אז נחזיר אותו
+                Person* tmp = search_id(db, p->childrenPtr[j + 1]); // מצביע לבדוק האם קיים אח גדול // 'tmp' for check if there is older brother.
+                if (!tmp) // אם לא קיים אח // If not..
+                    continue; // אז נמשיך לאח הבא // Next brother.
+               return tmp; // אם מצאנו אח אז נחזיר אותו // If exist then return him.
             }
-            return NULL; // לא מצאנו עוד אחים הרשומים במאגר לכן נחזיר נאל
+            return NULL; // לא מצאנו עוד אחים הרשומים במאגר לכן נחזיר נאל // Not exist then return null.
         }
     }
     return NULL;
 }
+// This function check the id input. 'x = 0' -> id > 0 , 'x = -1' id >= 0.
 // פונקציה הבודקת את תקינות הקלט ומקבלת ארגומנט איקס שמחליט אם 0 זה תקין או לא. אם האיקס שווה ל0 אז ללא אופציית האפס. אם האיקס שווה ל1- אז אופציית ה0 מתקבלת.
 void idCheck(long long* id ,int x)
 {
@@ -677,6 +699,7 @@ void idCheck(long long* id ,int x)
         scanf("%lld", id);
     }
 }
+// This function find parent by id of his child and return parent address. 
 // פונקציה המוצאת הורה לפי מספר תעודת זהות של הילד. כאשר ההורה נמצא במערך של ההורים בפונקצית דור ומחזירה כתובת של ההורה
 Person* FatherOrMother(long long id ,Person* parents , int size)
 {
